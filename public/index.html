@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,14 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-
+ 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+ 
   const firebaseConfig = {
     apiKey:            "AIzaSyAYFABwGi9rw7JGoGO0EW_ZGZzecgci-xE",
     authDomain:        "boutique-60663.firebaseapp.com",
@@ -25,12 +24,12 @@
     appId:             "1:259880500579:web:7989d225d1e4f7320de756",
     measurementId:     "G-EYYPNWXX5H"
   };
-
+ 
   const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
   const provider = new GoogleAuthProvider();
-
+ 
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.getElementById("authScreen").style.display = "none";
@@ -43,7 +42,7 @@
       document.getElementById("mainContent").style.display = "none";
     }
   });
-
+ 
   window.signInGoogle = async () => {
     try {
       await signInWithPopup(auth, provider);
@@ -52,11 +51,11 @@
       alert("Connexion échouée. Vérifie que ton domaine est autorisé dans Firebase.");
     }
   };
-
+ 
   window.signOutUser = async () => {
     await signOut(auth);
   };
-
+ 
   window.saveOrderToFirebase = async (orderData) => {
     const user = auth.currentUser;
     if (!user) return;
@@ -70,7 +69,7 @@
     });
   };
 </script>
-
+ 
 <style>
 :root {
   --bg:     #070810;
@@ -83,17 +82,17 @@
   --gold:   #FFD700;
   --border: #24273a;
 }
-
+ 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior: smooth; }
-
+ 
 body {
   background: radial-gradient(circle at top, rgba(124,58,237,.25), transparent 40%), var(--bg);
   color: var(--text);
   font-family: 'Space Grotesk', sans-serif;
   overflow-x: hidden;
 }
-
+ 
 /* AUTH */
 #authScreen {
   position: fixed; inset: 0; z-index: 999;
@@ -119,7 +118,7 @@ body {
 }
 .google-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,.4); }
 .google-btn img { width: 22px; }
-
+ 
 /* TOP BAR */
 .topbar {
   background: linear-gradient(90deg, var(--cyan), var(--violet));
@@ -127,7 +126,7 @@ body {
   font-weight: 700; padding: 10px; font-size: .9rem;
 }
 .topbar span { margin: 0 15px; }
-
+ 
 /* NAV */
 nav {
   position: sticky; top: 0; z-index: 100;
@@ -149,7 +148,7 @@ nav {
   cursor: pointer; transition: .3s; font-size: .85rem;
 }
 .logout-btn:hover { border-color: var(--pink); color: var(--pink); }
-
+ 
 .main-btn, .buy-button {
   background: linear-gradient(135deg, var(--cyan), var(--violet));
   color: black; border: none; padding: 15px 30px;
@@ -158,7 +157,7 @@ nav {
   font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
 }
 .main-btn:hover, .buy-button:hover { transform: translateY(-4px); box-shadow: 0 0 30px var(--violet); }
-
+ 
 /* HERO */
 .hero {
   display: grid; grid-template-columns: 1fr 1fr;
@@ -178,7 +177,7 @@ nav {
 .hero-stats { display: flex; gap: 40px; margin-top: 45px; }
 .hero-stats h3 { color: var(--cyan); font-size: 1.8rem; }
 .hero-stats p { color: var(--dim); }
-
+ 
 /* HERO IMAGE */
 .hero-image-wrap {
   border-radius: 25px; overflow: hidden;
@@ -191,13 +190,13 @@ nav {
   0%,100% { transform: rotate(-2deg) translateY(0); }
   50%      { transform: rotate(2deg) translateY(-15px); }
 }
-
+ 
 /* PRODUCT SECTION */
 .product-section { padding: 100px 8%; }
 .section-title { text-align: center; margin-bottom: 60px; }
 .section-title span { color: var(--cyan); text-transform: uppercase; letter-spacing: 3px; }
 .section-title h2 { font-size: 3rem; margin: 15px 0; }
-
+ 
 /* GALLERY GRID */
 .gallery-grid {
   display: grid;
@@ -233,7 +232,7 @@ nav {
   opacity: 0; transition: .3s;
 }
 .gallery-item:hover .gallery-zoom-hint { opacity: 1; }
-
+ 
 /* LIGHTBOX */
 .lightbox {
   display: none; position: fixed; inset: 0; z-index: 9000;
@@ -265,7 +264,7 @@ nav {
   cursor: pointer; font-size: 1.2rem; transition: .3s;
 }
 .lightbox-nav button:hover { border-color: var(--cyan); color: var(--cyan); }
-
+ 
 /* PRODUCT INFO */
 .product-info-box {
   max-width: 700px; margin: 0 auto;
@@ -284,7 +283,7 @@ nav {
   -webkit-background-clip: text; color: transparent; margin-bottom: 8px;
 }
 .price-sub { color: var(--dim); font-size: .9rem; margin-bottom: 25px; }
-
+ 
 /* ADVANTAGES */
 .advantages {
   display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
@@ -293,7 +292,7 @@ nav {
 .adv { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
 .adv h3 { font-size: 1.1rem; margin-bottom: 12px; }
 .adv p { color: var(--dim); line-height: 1.6; }
-
+ 
 /* REVIEWS */
 .reviews { padding: 100px 8%; }
 .review-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 25px; }
@@ -304,7 +303,7 @@ nav {
 .review:hover { transform: translateY(-5px); border-color: var(--cyan); }
 .review p { color: var(--dim); margin: 15px 0; line-height: 1.6; font-style: italic; }
 .review h4 { color: var(--cyan); }
-
+ 
 /* COMMANDE */
 #commande { padding: 100px 8%; }
 .order-box {
@@ -327,7 +326,7 @@ nav {
   color: var(--dim); font-size: .8rem; margin: 12px 0;
 }
 .stripe-badge::before { content: '🔒'; font-size: 1rem; }
-
+ 
 /* SUMMARY */
 .summary { background: #070810; border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
 .summary h3 { font-size: 1.3rem; margin-bottom: 25px; }
@@ -339,7 +338,7 @@ nav {
 .guarantee { background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.2); color: var(--violet); padding: 12px; border-radius: 10px; text-align: center; margin-top: 12px; font-size: .9rem; }
 .buy-button { width: 100%; margin-top: 20px; text-align: center; font-size: 1.1rem; }
 .stripe-loading { display: none; text-align: center; padding: 20px; color: var(--dim); }
-
+ 
 /* FAQ */
 .faq { padding: 100px 8%; }
 .faq-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 25px; }
@@ -347,7 +346,7 @@ nav {
 .faq-card:hover { transform: translateY(-5px); border-color: var(--cyan); }
 .faq-card h3 { margin-bottom: 12px; }
 .faq-card p { color: var(--dim); line-height: 1.6; }
-
+ 
 /* FOOTER */
 footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--border); }
 .footer-logo { font-size: 2rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
@@ -356,7 +355,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
 .footer-links a { color: var(--dim); text-decoration: none; }
 .footer-links a:hover { color: white; }
 .copyright { color: var(--dim); }
-
+ 
 /* TOAST */
 .toast {
   position: fixed; bottom: 30px; right: 30px; z-index: 9999;
@@ -366,7 +365,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
   transition: .4s; max-width: 320px;
 }
 .toast.show { transform: translateY(0); opacity: 1; }
-
+ 
 /* MOBILE */
 @media(max-width:900px) {
   .hero { grid-template-columns: 1fr; text-align: center; }
@@ -377,7 +376,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
 </style>
 </head>
 <body>
-
+ 
 <!-- AUTH SCREEN -->
 <div id="authScreen">
   <div class="auth-box">
@@ -389,17 +388,17 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     </button>
   </div>
 </div>
-
+ 
 <!-- CONTENU PRINCIPAL -->
 <div id="mainContent" style="display:none">
-
+ 
 <!-- TOP BAR -->
 <div class="topbar">
   🚀 Livraison offerte dès 30€
   <span>•</span> ⭐ Plus de 500 gamers satisfaits
   <span>•</span> 🔒 Paiement sécurisé Stripe
 </div>
-
+ 
 <!-- NAV -->
 <nav>
   <div class="logo">PSEUDO<span>PAD</span></div>
@@ -414,7 +413,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     <button class="logout-btn" onclick="signOutUser()">Déconnexion</button>
   </div>
 </nav>
-
+ 
 <!-- HERO -->
 <header class="hero">
   <div class="hero-text">
@@ -429,46 +428,46 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     </div>
   </div>
   <div class="hero-image-wrap">
-    <img id="heroImg" src="data:image/png;base64,${IMG4}" alt="PSEUDOPAD tapis de souris">
+    <img id="heroImg" src="https://i.postimg.cc/FfHSkXCG/Capture-d-ecran-2026-06-16-170607.png" alt="PSEUDOPAD tapis de souris">
   </div>
 </header>
-
+ 
 <!-- PRODUIT -->
 <section id="produit" class="product-section">
   <div class="section-title">
     <span>Nos designs</span>
     <h2>Clique sur un tapis pour le voir en grand</h2>
   </div>
-
+ 
   <!-- GALLERY -->
   <div class="gallery-grid">
     <div class="gallery-item" onclick="openLightbox(0)">
-      <img src="data:image/png;base64,${IMG1}" alt="Tapis Topographique Blanc">
+      <img src="https://i.postimg.cc/6pZr291f/Capture-d-ecran-2026-06-16-170839.png" alt="Tapis Topographique Blanc">
       <div class="gallery-label">Topographique Blanc</div>
       <div class="gallery-zoom-hint">🔍 Voir en grand</div>
     </div>
     <div class="gallery-item" onclick="openLightbox(1)">
-      <img src="data:image/png;base64,${IMG2}" alt="Tapis Topographique Noir">
+      <img src="https://i.postimg.cc/Lq8PgFQw/Capture-d-ecran-2026-06-16-170858.png" alt="Tapis Topographique Noir">
       <div class="gallery-label">Topographique Noir</div>
       <div class="gallery-zoom-hint">🔍 Voir en grand</div>
     </div>
     <div class="gallery-item" onclick="openLightbox(2)">
-      <img src="data:image/png;base64,${IMG3}" alt="Tapis Hexagones Violet">
+      <img src="https://i.postimg.cc/zXsW1sXV/Capture-d-ecran-2026-06-16-170731.png" alt="Tapis Hexagones Violet">
       <div class="gallery-label">Hexagones Violet</div>
       <div class="gallery-zoom-hint">🔍 Voir en grand</div>
     </div>
     <div class="gallery-item" onclick="openLightbox(3)">
-      <img src="data:image/png;base64,${IMG4}" alt="Tapis Hexagones Cyan">
+      <img src="https://i.postimg.cc/FfHSkXCG/Capture-d-ecran-2026-06-16-170607.png" alt="Tapis Hexagones Cyan">
       <div class="gallery-label">Hexagones Cyan</div>
       <div class="gallery-zoom-hint">🔍 Voir en grand</div>
     </div>
     <div class="gallery-item" onclick="openLightbox(4)">
-      <img src="data:image/png;base64,${IMG5}" alt="Tapis Géo Néon">
+      <img src="https://i.postimg.cc/NyjX2vCV/Capture-d-ecran-2026-06-16-170704.png" alt="Tapis Géo Néon">
       <div class="gallery-label">Géo Néon</div>
       <div class="gallery-zoom-hint">🔍 Voir en grand</div>
     </div>
   </div>
-
+ 
   <!-- PRODUCT INFO -->
   <div class="product-info-box">
     <h3>Tapis Standard</h3>
@@ -487,7 +486,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     <a href="#commande" class="main-btn">Commander mon tapis →</a>
   </div>
 </section>
-
+ 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightboxOutside(event)">
   <div class="lightbox-inner">
@@ -499,7 +498,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     </div>
   </div>
 </div>
-
+ 
 <!-- AVANTAGES -->
 <section>
   <div class="advantages">
@@ -509,7 +508,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     <div class="adv"><h3>💳 Paiement sécurisé</h3><p>Stripe est le leader mondial du paiement en ligne. Tes données sont protégées.</p></div>
   </div>
 </section>
-
+ 
 <!-- AVIS -->
 <section id="avis" class="reviews">
   <div class="section-title">
@@ -534,7 +533,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     </div>
   </div>
 </section>
-
+ 
 <!-- COMMANDE -->
 <section id="commande">
   <div class="section-title">
@@ -545,10 +544,10 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     <div class="order-left">
       <h2>Récapitulatif</h2>
       <p>Ton tapis est presque prêt. Valide ta commande.</p>
-
+ 
       <label>Pseudo sur le tapis</label>
       <input type="text" id="orderPseudo" placeholder="Ton pseudo" maxlength="16" oninput="document.getElementById('sumPseudo').textContent = this.value || '—'">
-
+ 
       <label>Design du tapis</label>
       <select id="designSelect" onchange="document.getElementById('sumDesign').textContent = this.options[this.selectedIndex].text">
         <option value="Topographique Blanc">Topographique Blanc</option>
@@ -557,18 +556,18 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
         <option value="Hexagones Cyan">Hexagones Cyan</option>
         <option value="Géo Néon">Géo Néon</option>
       </select>
-
+ 
       <label>Adresse email de confirmation</label>
       <input type="email" id="emailInput" placeholder="ton@email.com">
-
+ 
       <div class="stripe-badge">Paiement sécurisé par Stripe — chiffrement SSL 256 bits</div>
-
+ 
       <button class="buy-button" id="buyBtn" onclick="handleCheckout()">
         🚀 Commander et payer — 14,90€
       </button>
       <div class="stripe-loading" id="stripeLoading">⏳ Redirection vers Stripe...</div>
     </div>
-
+ 
     <div class="order-right">
       <div class="summary">
         <h3>📋 Ta commande</h3>
@@ -583,7 +582,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     </div>
   </div>
 </section>
-
+ 
 <!-- FAQ -->
 <section class="faq">
   <div class="section-title">
@@ -597,7 +596,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     <div class="faq-card"><h3>🧼 Comment nettoyer le tapis ?</h3><p>Un simple chiffon humide suffit pour garder ton PSEUDOPAD propre et en parfait état.</p></div>
   </div>
 </section>
-
+ 
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">PSEUDO<span>PAD</span></div>
@@ -610,12 +609,12 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
   </div>
   <div class="copyright">© 2026 PSEUDOPAD — Tous droits réservés.</div>
 </footer>
-
+ 
 </div><!-- /mainContent -->
-
+ 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
+ 
 <script>
 /* Images pour la lightbox */
 const galleryImgs = [
@@ -626,33 +625,33 @@ const galleryImgs = [
   document.querySelectorAll('.gallery-item img')[4].src,
 ];
 let currentImg = 0;
-
+ 
 function openLightbox(index) {
   currentImg = index;
   document.getElementById('lightboxImg').src = galleryImgs[index];
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
+ 
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
-
+ 
 function closeLightboxOutside(e) {
   if (e.target === document.getElementById('lightbox')) closeLightbox();
 }
-
+ 
 function nextImg() {
   currentImg = (currentImg + 1) % galleryImgs.length;
   document.getElementById('lightboxImg').src = galleryImgs[currentImg];
 }
-
+ 
 function prevImg() {
   currentImg = (currentImg - 1 + galleryImgs.length) % galleryImgs.length;
   document.getElementById('lightboxImg').src = galleryImgs[currentImg];
 }
-
+ 
 document.addEventListener('keydown', (e) => {
   if (document.getElementById('lightbox').classList.contains('open')) {
     if (e.key === 'Escape') closeLightbox();
@@ -660,28 +659,28 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') prevImg();
   }
 });
-
+ 
 /* CHECKOUT */
 async function handleCheckout() {
   const pseudo = document.getElementById("orderPseudo").value.trim();
   const email  = document.getElementById("emailInput").value.trim();
   const design = document.getElementById("designSelect").value;
-
+ 
   if (!pseudo) { showToast("❌ Écris ton pseudo d'abord !"); return; }
   if (!email || !email.includes("@")) { showToast("❌ Adresse email invalide."); return; }
-
+ 
   const orderData = { pseudo, email, model: "Standard", design, price: "14.90", stripeStatus: "pending" };
   if (window.saveOrderToFirebase) {
     try { await window.saveOrderToFirebase(orderData); } catch(e) { console.warn("Firebase:", e); }
   }
-
+ 
   document.getElementById("stripeLoading").style.display = "block";
   document.getElementById("buyBtn").style.display = "none";
-
+ 
   const stripeUrl = "https://buy.stripe.com/test_14A4gA6O6ebY9sQc9haAw00";
   window.location.href = stripeUrl + "?prefilled_email=" + encodeURIComponent(email) + "&client_reference_id=" + encodeURIComponent(pseudo) + "_" + encodeURIComponent(design);
 }
-
+ 
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -691,4 +690,3 @@ function showToast(msg) {
 </script>
 </body>
 </html>
-
