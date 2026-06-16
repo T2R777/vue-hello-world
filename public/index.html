@@ -1,10 +1,4 @@
-IMG1=$(cat /tmp/img1.b64)
-IMG2=$(cat /tmp/img2.b64)
-IMG3=$(cat /tmp/img3.b64)
-IMG4=$(cat /tmp/img4.b64)
-IMG5=$(cat /tmp/img5.b64)
 
-cat > /mnt/user-data/outputs/pseudopad.html << HTMLEOF
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -697,5 +691,4 @@ function showToast(msg) {
 </script>
 </body>
 </html>
-HTMLEOF
-echo "done: $(wc -c < /mnt/user-data/outputs/pseudopad.html) bytes"
+
