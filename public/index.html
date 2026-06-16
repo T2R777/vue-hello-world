@@ -1,17 +1,701 @@
+IMG1=$(cat /tmp/img1.b64)
+IMG2=$(cat /tmp/img2.b64)
+IMG3=$(cat /tmp/img3.b64)
+IMG4=$(cat /tmp/img4.b64)
+IMG5=$(cat /tmp/img5.b64)
+
+cat > /mnt/user-data/outputs/pseudopad.html << HTMLEOF
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title>vue-hello-world</title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but vue-hello-world doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSEUDOPAD — Ton setup, ton identité</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAYFABwGi9rw7JGoGO0EW_ZGZzecgci-xE",
+    authDomain:        "boutique-60663.firebaseapp.com",
+    projectId:         "boutique-60663",
+    storageBucket:     "boutique-60663.firebasestorage.app",
+    messagingSenderId: "259880500579",
+    appId:             "1:259880500579:web:7989d225d1e4f7320de756",
+    measurementId:     "G-EYYPNWXX5H"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById("authScreen").style.display = "none";
+      document.getElementById("mainContent").style.display = "block";
+      document.getElementById("userAvatar").src  = user.photoURL || "";
+      document.getElementById("userName").textContent = user.displayName;
+      document.getElementById("userEmail").textContent = user.email;
+    } else {
+      document.getElementById("authScreen").style.display = "flex";
+      document.getElementById("mainContent").style.display = "none";
+    }
+  });
+
+  window.signInGoogle = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch(e) {
+      console.error("Erreur connexion :", e);
+      alert("Connexion échouée. Vérifie que ton domaine est autorisé dans Firebase.");
+    }
+  };
+
+  window.signOutUser = async () => {
+    await signOut(auth);
+  };
+
+  window.saveOrderToFirebase = async (orderData) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    await addDoc(collection(db, "orders"), {
+      ...orderData,
+      userId:    user.uid,
+      userEmail: user.email,
+      userName:  user.displayName,
+      createdAt: serverTimestamp(),
+      status:    "pending"
+    });
+  };
+</script>
+
+<style>
+:root {
+  --bg:     #070810;
+  --card:   #11131d;
+  --text:   #ffffff;
+  --dim:    #9aa0b5;
+  --cyan:   #00E5FF;
+  --violet: #7C3AED;
+  --pink:   #FF2E63;
+  --gold:   #FFD700;
+  --border: #24273a;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: radial-gradient(circle at top, rgba(124,58,237,.25), transparent 40%), var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+}
+
+/* AUTH */
+#authScreen {
+  position: fixed; inset: 0; z-index: 999;
+  background: radial-gradient(circle at center, rgba(124,58,237,.35), transparent 70%), var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.auth-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 50px 40px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+}
+.auth-logo { font-family: 'Rajdhani', sans-serif; font-size: 2.4rem; font-weight: 700; margin-bottom: 12px; }
+.auth-logo span { color: var(--cyan); }
+.auth-box p { color: var(--dim); margin-bottom: 35px; line-height: 1.6; }
+.google-btn {
+  background: white; color: #333; border: none; padding: 16px 30px;
+  border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; gap: 12px; margin: 0 auto; transition: .3s;
+}
+.google-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.google-btn img { width: 22px; }
+
+/* TOP BAR */
+.topbar {
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  color: black; text-align: center;
+  font-weight: 700; padding: 10px; font-size: .9rem;
+}
+.topbar span { margin: 0 15px; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,8,16,.8); backdrop-filter: blur(14px);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 8%;
+}
+.logo { font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; font-weight: 700; }
+.logo span { color: var(--cyan); }
+.nav-links { display: flex; gap: 30px; }
+.nav-links a { color: var(--dim); text-decoration: none; transition: .3s; }
+.nav-links a:hover { color: white; }
+.nav-user { display: flex; align-items: center; gap: 12px; }
+.nav-user img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--cyan); }
+.nav-user span { color: var(--dim); font-size: .85rem; }
+.logout-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--dim); padding: 8px 16px; border-radius: 10px;
+  cursor: pointer; transition: .3s; font-size: .85rem;
+}
+.logout-btn:hover { border-color: var(--pink); color: var(--pink); }
+
+.main-btn, .buy-button {
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  color: black; border: none; padding: 15px 30px;
+  border-radius: 12px; font-weight: 700; cursor: pointer;
+  transition: .3s; text-decoration: none; display: inline-block;
+  font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+}
+.main-btn:hover, .buy-button:hover { transform: translateY(-4px); box-shadow: 0 0 30px var(--violet); }
+
+/* HERO */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; gap: 60px; padding: 90px 8%;
+}
+.badge {
+  background: rgba(0,229,255,.15); border: 1px solid var(--cyan);
+  color: var(--cyan); width: max-content; padding: 8px 16px;
+  border-radius: 50px; margin-bottom: 25px;
+}
+.hero h1 { font-size: 4.2rem; line-height: 1.05; }
+.hero h1 span {
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  -webkit-background-clip: text; color: transparent;
+}
+.hero p { color: var(--dim); font-size: 1.1rem; margin: 25px 0 35px; max-width: 500px; }
+.hero-stats { display: flex; gap: 40px; margin-top: 45px; }
+.hero-stats h3 { color: var(--cyan); font-size: 1.8rem; }
+.hero-stats p { color: var(--dim); }
+
+/* HERO IMAGE */
+.hero-image-wrap {
+  border-radius: 25px; overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0,0,0,.6), 0 0 60px rgba(124,58,237,.2);
+  border: 1px solid rgba(124,58,237,.3);
+  animation: float 5s ease-in-out infinite;
+}
+.hero-image-wrap img { width: 100%; display: block; }
+@keyframes float {
+  0%,100% { transform: rotate(-2deg) translateY(0); }
+  50%      { transform: rotate(2deg) translateY(-15px); }
+}
+
+/* PRODUCT SECTION */
+.product-section { padding: 100px 8%; }
+.section-title { text-align: center; margin-bottom: 60px; }
+.section-title span { color: var(--cyan); text-transform: uppercase; letter-spacing: 3px; }
+.section-title h2 { font-size: 3rem; margin: 15px 0; }
+
+/* GALLERY GRID */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto 60px;
+}
+.gallery-item {
+  border-radius: 18px; overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: .3s;
+  position: relative;
+}
+.gallery-item:hover {
+  transform: translateY(-6px);
+  border-color: var(--cyan);
+  box-shadow: 0 0 30px rgba(0,229,255,.2);
+}
+.gallery-item img { width: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; }
+.gallery-item .gallery-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.85), transparent);
+  color: var(--cyan); font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem; font-weight: 700; padding: 16px 14px 12px;
+  letter-spacing: 1px; text-align: center;
+}
+.gallery-zoom-hint {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(0,0,0,.6); color: white;
+  border-radius: 8px; padding: 4px 10px; font-size: .75rem;
+  opacity: 0; transition: .3s;
+}
+.gallery-item:hover .gallery-zoom-hint { opacity: 1; }
+
+/* LIGHTBOX */
+.lightbox {
+  display: none; position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.92); align-items: center; justify-content: center;
+}
+.lightbox.open { display: flex; }
+.lightbox-inner {
+  position: relative; max-width: 90vw; max-height: 90vh;
+}
+.lightbox-inner img {
+  max-width: 90vw; max-height: 85vh;
+  border-radius: 18px;
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 60px rgba(0,229,255,.3);
+}
+.lightbox-close {
+  position: absolute; top: -16px; right: -16px;
+  background: var(--pink); color: white; border: none;
+  border-radius: 50%; width: 36px; height: 36px;
+  font-size: 1.2rem; cursor: pointer; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.lightbox-nav {
+  display: flex; justify-content: center; gap: 16px; margin-top: 16px;
+}
+.lightbox-nav button {
+  background: var(--card); border: 1px solid var(--border);
+  color: white; padding: 10px 22px; border-radius: 10px;
+  cursor: pointer; font-size: 1.2rem; transition: .3s;
+}
+.lightbox-nav button:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* PRODUCT INFO */
+.product-info-box {
+  max-width: 700px; margin: 0 auto;
+  background: var(--card); border: 1px solid rgba(0,229,255,.3);
+  border-radius: 28px; padding: 40px;
+}
+.product-info-box h3 { font-size: 2rem; margin-bottom: 8px; }
+.stars { color: var(--gold); margin-bottom: 16px; font-size: 1.1rem; }
+.product-info-box > p { color: var(--dim); line-height: 1.7; margin-bottom: 25px; }
+.features { list-style: none; margin-bottom: 28px; }
+.features li { padding: 8px 0; color: var(--dim); border-bottom: 1px solid var(--border); font-size: .95rem; }
+.features li:last-child { border-bottom: none; }
+.price-tag {
+  font-size: 3rem; font-weight: 700;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  -webkit-background-clip: text; color: transparent; margin-bottom: 8px;
+}
+.price-sub { color: var(--dim); font-size: .9rem; margin-bottom: 25px; }
+
+/* ADVANTAGES */
+.advantages {
+  display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 25px; padding: 0 8% 80px;
+}
+.adv { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
+.adv h3 { font-size: 1.1rem; margin-bottom: 12px; }
+.adv p { color: var(--dim); line-height: 1.6; }
+
+/* REVIEWS */
+.reviews { padding: 100px 8%; }
+.review-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 25px; }
+.review {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 25px; transition: .3s;
+}
+.review:hover { transform: translateY(-5px); border-color: var(--cyan); }
+.review p { color: var(--dim); margin: 15px 0; line-height: 1.6; font-style: italic; }
+.review h4 { color: var(--cyan); }
+
+/* COMMANDE */
+#commande { padding: 100px 8%; }
+.order-box {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 24px; padding: 45px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 50px;
+  max-width: 1000px; margin: 0 auto;
+}
+.order-left h2 { font-size: 2rem; margin-bottom: 12px; }
+.order-left > p { color: var(--dim); margin-bottom: 30px; }
+.order-left label { display: block; color: var(--dim); margin: 15px 0 8px; }
+.order-left input, .order-left select {
+  width: 100%; background: #070810; border: 1px solid var(--border);
+  color: white; padding: 14px; border-radius: 12px;
+  font-size: 1rem; font-family: 'Space Grotesk', sans-serif; transition: .3s;
+}
+.order-left input:focus, .order-left select:focus { outline: none; border-color: var(--cyan); }
+.stripe-badge {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--dim); font-size: .8rem; margin: 12px 0;
+}
+.stripe-badge::before { content: '🔒'; font-size: 1rem; }
+
+/* SUMMARY */
+.summary { background: #070810; border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
+.summary h3 { font-size: 1.3rem; margin-bottom: 25px; }
+.line { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); color: var(--dim); }
+.line strong { color: white; }
+.line.total { border-color: var(--cyan); }
+.line.total strong { color: var(--cyan); font-size: 1.4rem; }
+.secure { background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.2); color: var(--cyan); padding: 12px; border-radius: 10px; text-align: center; margin-top: 20px; font-size: .9rem; }
+.guarantee { background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.2); color: var(--violet); padding: 12px; border-radius: 10px; text-align: center; margin-top: 12px; font-size: .9rem; }
+.buy-button { width: 100%; margin-top: 20px; text-align: center; font-size: 1.1rem; }
+.stripe-loading { display: none; text-align: center; padding: 20px; color: var(--dim); }
+
+/* FAQ */
+.faq { padding: 100px 8%; }
+.faq-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 25px; }
+.faq-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; transition: .3s; }
+.faq-card:hover { transform: translateY(-5px); border-color: var(--cyan); }
+.faq-card h3 { margin-bottom: 12px; }
+.faq-card p { color: var(--dim); line-height: 1.6; }
+
+/* FOOTER */
+footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--border); }
+.footer-logo { font-size: 2rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
+.footer-logo span { color: var(--cyan); }
+.footer-links { margin: 30px 0; display: flex; justify-content: center; gap: 25px; flex-wrap: wrap; }
+.footer-links a { color: var(--dim); text-decoration: none; }
+.footer-links a:hover { color: white; }
+.copyright { color: var(--dim); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+  background: var(--card); border: 1px solid var(--cyan);
+  color: white; padding: 16px 24px; border-radius: 14px;
+  font-size: .95rem; transform: translateY(100px); opacity: 0;
+  transition: .4s; max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* MOBILE */
+@media(max-width:900px) {
+  .hero { grid-template-columns: 1fr; text-align: center; }
+  .hero-stats { justify-content: center; }
+  .nav-links { display: none; }
+  .order-box { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">PSEUDO<span>PAD</span></div>
+    <p>Connecte-toi avec ton compte Google pour accéder au configurateur et commander ton tapis personnalisé.</p>
+    <button class="google-btn" onclick="signInGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+      Continuer avec Google
+    </button>
+  </div>
+</div>
+
+<!-- CONTENU PRINCIPAL -->
+<div id="mainContent" style="display:none">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  🚀 Livraison offerte dès 30€
+  <span>•</span> ⭐ Plus de 500 gamers satisfaits
+  <span>•</span> 🔒 Paiement sécurisé Stripe
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">PSEUDO<span>PAD</span></div>
+  <div class="nav-links">
+    <a href="#produit">Produit</a>
+    <a href="#avis">Avis</a>
+    <a href="#commande">Commander</a>
+  </div>
+  <div class="nav-user">
+    <img id="userAvatar" src="" alt="avatar">
+    <span id="userName"></span>
+    <button class="logout-btn" onclick="signOutUser()">Déconnexion</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-text">
+    <div class="badge">🔥 Personnalisation illimitée</div>
+    <h1>Ton identité.<br>Ton <span>setup ultime</span>.<br>Un tapis unique.</h1>
+    <p>Crée un tapis de souris premium qui te ressemble. Ajoute ton pseudo, choisis ton design et transforme ton bureau en véritable setup gamer.</p>
+    <a href="#commande" class="main-btn">Créer mon tapis →</a>
+    <div class="hero-stats">
+      <div><h3>500+</h3><p>Clients heureux</p></div>
+      <div><h3>4.9/5</h3><p>Avis clients</p></div>
+      <div><h3>48h</h3><p>Fabrication</p></div>
+    </div>
+  </div>
+  <div class="hero-image-wrap">
+    <img id="heroImg" src="data:image/png;base64,${IMG4}" alt="PSEUDOPAD tapis de souris">
+  </div>
+</header>
+
+<!-- PRODUIT -->
+<section id="produit" class="product-section">
+  <div class="section-title">
+    <span>Nos designs</span>
+    <h2>Clique sur un tapis pour le voir en grand</h2>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="gallery-grid">
+    <div class="gallery-item" onclick="openLightbox(0)">
+      <img src="data:image/png;base64,${IMG1}" alt="Tapis Topographique Blanc">
+      <div class="gallery-label">Topographique Blanc</div>
+      <div class="gallery-zoom-hint">🔍 Voir en grand</div>
+    </div>
+    <div class="gallery-item" onclick="openLightbox(1)">
+      <img src="data:image/png;base64,${IMG2}" alt="Tapis Topographique Noir">
+      <div class="gallery-label">Topographique Noir</div>
+      <div class="gallery-zoom-hint">🔍 Voir en grand</div>
+    </div>
+    <div class="gallery-item" onclick="openLightbox(2)">
+      <img src="data:image/png;base64,${IMG3}" alt="Tapis Hexagones Violet">
+      <div class="gallery-label">Hexagones Violet</div>
+      <div class="gallery-zoom-hint">🔍 Voir en grand</div>
+    </div>
+    <div class="gallery-item" onclick="openLightbox(3)">
+      <img src="data:image/png;base64,${IMG4}" alt="Tapis Hexagones Cyan">
+      <div class="gallery-label">Hexagones Cyan</div>
+      <div class="gallery-zoom-hint">🔍 Voir en grand</div>
+    </div>
+    <div class="gallery-item" onclick="openLightbox(4)">
+      <img src="data:image/png;base64,${IMG5}" alt="Tapis Géo Néon">
+      <div class="gallery-label">Géo Néon</div>
+      <div class="gallery-zoom-hint">🔍 Voir en grand</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT INFO -->
+  <div class="product-info-box">
+    <h3>Tapis Standard</h3>
+    <div class="stars">★★★★★</div>
+    <p>Le classique pour bien commencer. Surface micro-texturée optimisée pour la précision, base antidérapante et ton pseudo en néon personnalisé.</p>
+    <ul class="features">
+      <li>✔ 30 × 25 cm — format bureau parfait</li>
+      <li>✔ Surface optimisée FPS et précision</li>
+      <li>✔ Base caoutchouc antidérapante</li>
+      <li>✔ Pseudo personnalisé en néon</li>
+      <li>✔ 5 designs au choix</li>
+      <li>✔ Fabrication sous 48h</li>
+    </ul>
+    <div class="price-tag">14,90€</div>
+    <div class="price-sub">Livraison offerte • Garantie 30 jours</div>
+    <a href="#commande" class="main-btn">Commander mon tapis →</a>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightboxOutside(event)">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" src="" alt="Aperçu tapis">
+    <div class="lightbox-nav">
+      <button onclick="prevImg()">‹ Précédent</button>
+      <button onclick="nextImg()">Suivant ›</button>
+    </div>
+  </div>
+</div>
+
+<!-- AVANTAGES -->
+<section>
+  <div class="advantages">
+    <div class="adv"><h3>⚡ Qualité esport</h3><p>Surface optimisée pour la précision de la souris et les jeux compétitifs.</p></div>
+    <div class="adv"><h3>🎨 100% personnalisé</h3><p>Ton pseudo, ton design, ton identité. Aucun tapis ne ressemble au tien.</p></div>
+    <div class="adv"><h3>🚚 Livraison rapide</h3><p>Production sous 48h et livraison suivie directement chez toi.</p></div>
+    <div class="adv"><h3>💳 Paiement sécurisé</h3><p>Stripe est le leader mondial du paiement en ligne. Tes données sont protégées.</p></div>
+  </div>
+</section>
+
+<!-- AVIS -->
+<section id="avis" class="reviews">
+  <div class="section-title">
+    <span>Ils adorent PSEUDOPAD</span>
+    <h2>Plus de 500 gamers convaincus</h2>
+  </div>
+  <div class="review-grid">
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <p>"Je pensais recevoir un simple tapis, mais la qualité est incroyable. Le néon de mon pseudo est magnifique."</p>
+      <h4>Lucas M.</h4>
+    </div>
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <p>"Le tapis est parfait pour mon setup. Mes potes me demandent tous où je l'ai acheté."</p>
+      <h4>Emma R.</h4>
+    </div>
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <p>"Livraison rapide, impression propre et matériaux premium. Je recommande à 100%."</p>
+      <h4>Nathan K.</h4>
+    </div>
+  </div>
+</section>
+
+<!-- COMMANDE -->
+<section id="commande">
+  <div class="section-title">
+    <span>Commander</span>
+    <h2>Finalise ton PSEUDOPAD</h2>
+  </div>
+  <div class="order-box">
+    <div class="order-left">
+      <h2>Récapitulatif</h2>
+      <p>Ton tapis est presque prêt. Valide ta commande.</p>
+
+      <label>Pseudo sur le tapis</label>
+      <input type="text" id="orderPseudo" placeholder="Ton pseudo" maxlength="16" oninput="document.getElementById('sumPseudo').textContent = this.value || '—'">
+
+      <label>Design du tapis</label>
+      <select id="designSelect" onchange="document.getElementById('sumDesign').textContent = this.options[this.selectedIndex].text">
+        <option value="Topographique Blanc">Topographique Blanc</option>
+        <option value="Topographique Noir">Topographique Noir</option>
+        <option value="Hexagones Violet">Hexagones Violet</option>
+        <option value="Hexagones Cyan">Hexagones Cyan</option>
+        <option value="Géo Néon">Géo Néon</option>
+      </select>
+
+      <label>Adresse email de confirmation</label>
+      <input type="email" id="emailInput" placeholder="ton@email.com">
+
+      <div class="stripe-badge">Paiement sécurisé par Stripe — chiffrement SSL 256 bits</div>
+
+      <button class="buy-button" id="buyBtn" onclick="handleCheckout()">
+        🚀 Commander et payer — 14,90€
+      </button>
+      <div class="stripe-loading" id="stripeLoading">⏳ Redirection vers Stripe...</div>
+    </div>
+
+    <div class="order-right">
+      <div class="summary">
+        <h3>📋 Ta commande</h3>
+        <div class="line"><span>Pseudo</span><strong id="sumPseudo">—</strong></div>
+        <div class="line"><span>Modèle</span><strong>Standard 30×25 cm</strong></div>
+        <div class="line"><span>Design</span><strong id="sumDesign">Topographique Blanc</strong></div>
+        <div class="line"><span>Livraison</span><strong>Gratuite 🎉</strong></div>
+        <div class="line total"><span>Total</span><strong>14,90€</strong></div>
+        <div class="secure">🔒 Paiement 100% sécurisé</div>
+        <div class="guarantee">🛡️ Garantie satisfaction 30 jours</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="section-title">
+    <span>Questions fréquentes</span>
+    <h2>Tout savoir avant de commander</h2>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-card"><h3>📦 Quel est le délai de livraison ?</h3><p>Fabrication sous 48h puis expédition avec suivi. Comptez 3 à 5 jours ouvrés au total.</p></div>
+    <div class="faq-card"><h3>💳 Comment fonctionne le paiement ?</h3><p>Tu es redirigé vers Stripe, la plateforme de paiement la plus sécurisée au monde. Carte bancaire, Apple Pay, Google Pay acceptés.</p></div>
+    <div class="faq-card"><h3>🎨 Puis-je choisir mon design ?</h3><p>Oui, 5 designs sont disponibles. Tu choisis lors de la commande.</p></div>
+    <div class="faq-card"><h3>🧼 Comment nettoyer le tapis ?</h3><p>Un simple chiffon humide suffit pour garder ton PSEUDOPAD propre et en parfait état.</p></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">PSEUDO<span>PAD</span></div>
+  <p>Le tapis de souris qui transforme ton setup en œuvre unique.</p>
+  <div class="footer-links">
+    <a href="#">Mentions légales</a>
+    <a href="#">CGV</a>
+    <a href="#">Contact</a>
+    <a href="#">Instagram</a>
+  </div>
+  <div class="copyright">© 2026 PSEUDOPAD — Tous droits réservés.</div>
+</footer>
+
+</div><!-- /mainContent -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* Images pour la lightbox */
+const galleryImgs = [
+  document.querySelectorAll('.gallery-item img')[0].src,
+  document.querySelectorAll('.gallery-item img')[1].src,
+  document.querySelectorAll('.gallery-item img')[2].src,
+  document.querySelectorAll('.gallery-item img')[3].src,
+  document.querySelectorAll('.gallery-item img')[4].src,
+];
+let currentImg = 0;
+
+function openLightbox(index) {
+  currentImg = index;
+  document.getElementById('lightboxImg').src = galleryImgs[index];
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeLightboxOutside(e) {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+}
+
+function nextImg() {
+  currentImg = (currentImg + 1) % galleryImgs.length;
+  document.getElementById('lightboxImg').src = galleryImgs[currentImg];
+}
+
+function prevImg() {
+  currentImg = (currentImg - 1 + galleryImgs.length) % galleryImgs.length;
+  document.getElementById('lightboxImg').src = galleryImgs[currentImg];
+}
+
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('lightbox').classList.contains('open')) {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') nextImg();
+    if (e.key === 'ArrowLeft') prevImg();
+  }
+});
+
+/* CHECKOUT */
+async function handleCheckout() {
+  const pseudo = document.getElementById("orderPseudo").value.trim();
+  const email  = document.getElementById("emailInput").value.trim();
+  const design = document.getElementById("designSelect").value;
+
+  if (!pseudo) { showToast("❌ Écris ton pseudo d'abord !"); return; }
+  if (!email || !email.includes("@")) { showToast("❌ Adresse email invalide."); return; }
+
+  const orderData = { pseudo, email, model: "Standard", design, price: "14.90", stripeStatus: "pending" };
+  if (window.saveOrderToFirebase) {
+    try { await window.saveOrderToFirebase(orderData); } catch(e) { console.warn("Firebase:", e); }
+  }
+
+  document.getElementById("stripeLoading").style.display = "block";
+  document.getElementById("buyBtn").style.display = "none";
+
+  const stripeUrl = "https://buy.stripe.com/test_14A4gA6O6ebY9sQc9haAw00";
+  window.location.href = stripeUrl + "?prefilled_email=" + encodeURIComponent(email) + "&client_reference_id=" + encodeURIComponent(pseudo) + "_" + encodeURIComponent(design);
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 4000);
+}
+</script>
+</body>
 </html>
+HTMLEOF
+echo "done: $(wc -c < /mnt/user-data/outputs/pseudopad.html) bytes"
