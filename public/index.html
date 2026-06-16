@@ -419,7 +419,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
   <div class="hero-text">
     <div class="badge">🔥 Personnalisation illimitée</div>
     <h1>Ton identité.<br>Ton <span>setup ultime</span>.<br>Un tapis unique.</h1>
-    <p>Crée un tapis de souris premium qui te ressemble. Ajoute ton pseudo, choisis ton design et transforme ton bureau en véritable setup gamer.</p>
+    <p>Crée un tapis de souris premium qui te ressemble. Choisis ton design et transforme ton bureau en véritable setup gamer.</p>
     <a href="#commande" class="main-btn">Créer mon tapis →</a>
     <div class="hero-stats">
       <div><h3>500+</h3><p>Clients heureux</p></div>
@@ -472,12 +472,11 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
   <div class="product-info-box">
     <h3>Tapis Standard</h3>
     <div class="stars">★★★★★</div>
-    <p>Le classique pour bien commencer. Surface micro-texturée optimisée pour la précision, base antidérapante et ton pseudo en néon personnalisé.</p>
+    <p>Le classique pour bien commencer. Surface micro-texturée optimisée pour la précision, base antidérapante et design premium.</p>
     <ul class="features">
       <li>✔ 30 × 25 cm — format bureau parfait</li>
       <li>✔ Surface optimisée FPS et précision</li>
       <li>✔ Base caoutchouc antidérapante</li>
-      <li>✔ Pseudo personnalisé en néon</li>
       <li>✔ 5 designs au choix</li>
       <li>✔ Fabrication sous 48h</li>
     </ul>
@@ -503,7 +502,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
 <section>
   <div class="advantages">
     <div class="adv"><h3>⚡ Qualité esport</h3><p>Surface optimisée pour la précision de la souris et les jeux compétitifs.</p></div>
-    <div class="adv"><h3>🎨 100% personnalisé</h3><p>Ton pseudo, ton design, ton identité. Aucun tapis ne ressemble au tien.</p></div>
+    <div class="adv"><h3>🎨 100% personnalisé</h3><p>Ton design, ton identité. Aucun tapis ne ressemble au tien.</p></div>
     <div class="adv"><h3>🚚 Livraison rapide</h3><p>Production sous 48h et livraison suivie directement chez toi.</p></div>
     <div class="adv"><h3>💳 Paiement sécurisé</h3><p>Stripe est le leader mondial du paiement en ligne. Tes données sont protégées.</p></div>
   </div>
@@ -518,7 +517,7 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
   <div class="review-grid">
     <div class="review">
       <div class="stars">★★★★★</div>
-      <p>"Je pensais recevoir un simple tapis, mais la qualité est incroyable. Le néon de mon pseudo est magnifique."</p>
+      <p>"Je pensais recevoir un simple tapis, mais la qualité est incroyable. Le design est magnifique."</p>
       <h4>Lucas M.</h4>
     </div>
     <div class="review">
@@ -545,11 +544,8 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
       <h2>Récapitulatif</h2>
       <p>Ton tapis est presque prêt. Valide ta commande.</p>
  
-      <label>Pseudo sur le tapis</label>
-      <input type="text" id="orderPseudo" placeholder="Ton pseudo" maxlength="16" oninput="document.getElementById('sumPseudo').textContent = this.value || '—'">
- 
       <label>Design du tapis</label>
-      <select id="designSelect" onchange="document.getElementById('sumDesign').textContent = this.options[this.selectedIndex].text">
+      <select id="designSelect" onchange="updateDesignSummary()">
         <option value="Topographique Blanc">Topographique Blanc</option>
         <option value="Topographique Noir">Topographique Noir</option>
         <option value="Hexagones Violet">Hexagones Violet</option>
@@ -571,7 +567,6 @@ footer { padding: 60px 8%; text-align: center; border-top: 1px solid var(--borde
     <div class="order-right">
       <div class="summary">
         <h3>📋 Ta commande</h3>
-        <div class="line"><span>Pseudo</span><strong id="sumPseudo">—</strong></div>
         <div class="line"><span>Modèle</span><strong>Standard 30×25 cm</strong></div>
         <div class="line"><span>Design</span><strong id="sumDesign">Topographique Blanc</strong></div>
         <div class="line"><span>Livraison</span><strong>Gratuite 🎉</strong></div>
@@ -660,16 +655,28 @@ document.addEventListener('keydown', (e) => {
   }
 });
  
+/* Lien Stripe par design (4 premiers designs = 4 liens, le 5e réutilise le dernier) */
+const stripeLinks = {
+  "Topographique Blanc": "https://buy.stripe.com/test_fZucN64FY7NA34s7T1aAw01",
+  "Topographique Noir":  "https://buy.stripe.com/test_aFa7sMb4m3xk5cA1uDaAw02",
+  "Hexagones Violet":    "https://buy.stripe.com/test_fZueVe0pIc3QeNa5KTaAw03",
+  "Hexagones Cyan":      "https://buy.stripe.com/test_6oUdRa7Sa0l8bAY1uDaAw04",
+  "Géo Néon":            "https://buy.stripe.com/test_6oUdRa7Sa0l8bAY1uDaAw04"
+};
+ 
+function updateDesignSummary() {
+  const select = document.getElementById("designSelect");
+  document.getElementById("sumDesign").textContent = select.options[select.selectedIndex].text;
+}
+ 
 /* CHECKOUT */
 async function handleCheckout() {
-  const pseudo = document.getElementById("orderPseudo").value.trim();
   const email  = document.getElementById("emailInput").value.trim();
   const design = document.getElementById("designSelect").value;
  
-  if (!pseudo) { showToast("❌ Écris ton pseudo d'abord !"); return; }
   if (!email || !email.includes("@")) { showToast("❌ Adresse email invalide."); return; }
  
-  const orderData = { pseudo, email, model: "Standard", design, price: "14.90", stripeStatus: "pending" };
+  const orderData = { email, model: "Standard", design, price: "14.90", stripeStatus: "pending" };
   if (window.saveOrderToFirebase) {
     try { await window.saveOrderToFirebase(orderData); } catch(e) { console.warn("Firebase:", e); }
   }
@@ -677,8 +684,8 @@ async function handleCheckout() {
   document.getElementById("stripeLoading").style.display = "block";
   document.getElementById("buyBtn").style.display = "none";
  
-  const stripeUrl = "https://buy.stripe.com/test_14A4gA6O6ebY9sQc9haAw00";
-  window.location.href = stripeUrl + "?prefilled_email=" + encodeURIComponent(email) + "&client_reference_id=" + encodeURIComponent(pseudo) + "_" + encodeURIComponent(design);
+  const stripeUrl = stripeLinks[design] || stripeLinks["Topographique Blanc"];
+  window.location.href = stripeUrl + "?prefilled_email=" + encodeURIComponent(email);
 }
  
 function showToast(msg) {
